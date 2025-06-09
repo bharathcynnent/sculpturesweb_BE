@@ -8,14 +8,35 @@ router.post('/', async (req, res) => {
   try {
     const body = { ...req.body };
 
-    // Convert objects to strings if needed
+    // Normalize OS, browser, and device
     if (typeof body.os === 'object') body.os = `${body.os.name} ${body.os.version}`;
     if (typeof body.browser === 'object') body.browser = `${body.browser.name} ${body.browser.version}`;
     if (typeof body.device === 'object') body.device = `${body.device.type || ''} ${body.device.model || ''}`.trim();
 
-    const userData = new UserData(body);
-    await userData.save();
-    res.status(201).json({ message: 'User data stored successfully' });
+    const existingUser = await UserData.findOne({ visitorId: body.visitorId });
+if (existingUser) {
+  existingUser.visitCount += 1;
+  existingUser.sessionStart = new Date();
+  existingUser.timestamp = new Date();
+  await existingUser.save();
+  return res.status(200).json({
+    message: 'User visit count updated',
+    visitCount: existingUser.visitCount,
+  });
+} else {
+  const userData = new UserData({
+    ...body,
+    visitCount: 1,
+    sessionStart: new Date(),
+    timestamp: new Date(),
+  });
+  await userData.save();
+  return res.status(201).json({
+    message: 'New user data stored',
+    visitCount: 1,
+  });
+}
+
   } catch (err) {
     console.error('Error saving user data:', err);
     res.status(500).json({ message: 'Failed to store user data' });

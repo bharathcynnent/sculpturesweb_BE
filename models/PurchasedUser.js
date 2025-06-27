@@ -9,6 +9,11 @@ const purchasedUserSchema = new mongoose.Schema({
   productName: { type: String, required: true },
   price: { type: Number, required: true },
   deliveryDate: { type: Date, required: true },
+  purchaseDate: { type: Date, required: true },
+  status: { type: String, required: true },
+  quantity: { type: String, required: true },
+  paymentMethod: { type: String, required: true },
+
 }, { timestamps: true });
 
 module.exports = mongoose.model("PurchasedUser", purchasedUserSchema);
